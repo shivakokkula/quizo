@@ -367,7 +367,7 @@ function App() {
         <div className="quiz-header">
           <h2>📝 Quiz Generator</h2>
           <button onClick={toggleTheme} className="theme-toggle-button">
-            {theme === "light" ? "Dark Mode" : "Light Mode"}
+            {theme === "light" ? "Go Dark" : "Go Light"}
           </button>
         </div>
         <input type="file" onChange={handleUpload} className="upload-input" accept=".pdf,.txt,image/*"/>

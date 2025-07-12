@@ -10,23 +10,23 @@
   --border-secondary: #cbd5e1;
   --input-bg: #fff;
   --input-border: #cbd5e1;
-  --button-primary: #2563eb;
-  --button-primary-hover: #1e40af;
+  --button-primary: #304ffe; /* Darker blue */
+  --button-primary-hover: #283593;
   --button-primary-disabled: #a5b4fc;
-  --success-color: #059669;
+  --success-color: #8bc34a; /* Olive green */
   --error-color: #dc2626;
   --quiz-card-bg: #f3f4f6;
   --quiz-text: #22223b;
   --quiz-option-label: #4b5563;
   --quiz-correct-bg: #d1fae5;
-  --quiz-correct-text: #065f46;
-  --export-button-bg: #10b981;
-  --export-button-hover: #047857;
-  --export-button-disabled: #a7f3d0;
-  --edit-button-bg: #3b82f6;
-  --edit-button-hover: #2563eb;
-  --save-button-bg: #10b981;
-  --save-button-hover: #059669;
+  --quiz-correct-text: #388e3c; /* Darker green */
+  --export-button-bg: #8bc34a; /* Olive green */
+  --export-button-hover: #689f38;
+  --export-button-disabled: #bcf37d;
+  --edit-button-bg: #304ffe; /* Darker blue */
+  --edit-button-hover: #283593;
+  --save-button-bg: #8bc34a; /* Olive green */
+  --save-button-hover: #689f38;
   --theme-toggle-bg: #e2e8f0;
   --theme-toggle-text: #4a5568;
 }
@@ -42,23 +42,23 @@
   --border-secondary: #718096;
   --input-bg: #4a5568;
   --input-border: #718096;
-  --button-primary: #667eea;
-  --button-primary-hover: #5a67d8;
+  --button-primary: #3f51b5; /* Darker blue in dark mode */
+  --button-primary-hover: #283593;
   --button-primary-disabled: #879cf2;
-  --success-color: #68d391;
+  --success-color: #aed581; /* Lighter olive green in dark mode */
   --error-color: #f56565;
   --quiz-card-bg: #4a5568;
   --quiz-text: #f7fafc;
   --quiz-option-label: #d2d6dc;
   --quiz-correct-bg: #48bb78;
   --quiz-correct-text: #edf2f7;
-  --export-button-bg: #38a169;
-  --export-button-hover: #2f855a;
+  --export-button-bg: #aed581; /* Lighter olive green in dark mode */
+  --export-button-hover: #689f38;
   --export-button-disabled: #6fcf97;
-  --edit-button-bg: #667eea;
-  --edit-button-hover: #5a67d8;
-  --save-button-bg: #38a169;
-  --save-button-hover: #2f855a;
+  --edit-button-bg: #3f51b5; /* Darker blue in dark mode */
+  --edit-button-hover: #283593;
+  --save-button-bg: #aed581; /* Lighter olive green in dark mode */
+  --save-button-hover: #689f38;
   --theme-toggle-bg: #4a5568;
   --theme-toggle-text: #e2e8f0;
 }
@@ -172,7 +172,7 @@ h2 {
   margin-left: 5px;
   border-radius: 6px;
   border: 1px solid var(--border-secondary);
-  background: #e0f2f7; /* Light blue for better look */
+  background: #eef3f4; /* Light blue for better look */
   color: var(--text-secondary);
   min-width: 110px;
   margin-right: 10px;
@@ -304,7 +304,7 @@ h2 {
   border-radius: 6px;
   border: 1px solid var(--border-secondary);
   font-size: 1rem;
-  background: #e0f2f7;
+  background: #eef3f4;
   color: var(--text-secondary);
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
