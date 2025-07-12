@@ -4,11 +4,10 @@ import * as pdfjsLib from "pdfjs-dist";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import Tesseract from "tesseract.js";
-import dotenv from "dotenv";
-dotenv.config();
+import constants from "./constants";
 
 // take url from .env file
-const SERVER_URL = process.env.SERVER_URL;
+const SERVER_URL = constants.SERVER_URL;
 
 // Robust parser for various quiz formats
 function parseQuizOutput(quizText, numOptions = 4, questionType) {
