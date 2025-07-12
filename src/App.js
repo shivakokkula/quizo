@@ -1,25 +1,22 @@
 import React, { useState } from 'react';
 import './App.css';
 import * as pdfjsLib from 'pdfjs-dist';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
 
-// Utility: Parse the LLM quiz output into structured questions
 function parseQuizOutput(quizText) {
-  // Split by paragraphs (e.g., "**Paragraph 1:**")
   const paragraphBlocks = quizText.split(/\*\*Paragraph \d+:\*\*/).filter(Boolean);
 
   const questions = [];
   paragraphBlocks.forEach(block => {
-    // Find all questions in the block
     const questionBlocks = block.split(/(?=Question: )/).filter(q => q.trim().startsWith("Question:"));
     questionBlocks.forEach(qb => {
       const qMatch = qb.match(/Question:\s*(.+?)\s*Options:/s);
-      // Options: Match "A ...", "B ...", etc. until "Answer:"
       const optsMatch = qb.match(/Options:\s*([\s\S]*?)\s*Answer:/);
       const ansMatch = qb.match(/Answer:\s*([A-D])/);
 
       let options = [];
       if (optsMatch && optsMatch[1]) {
-        // Split options by lines starting with A, B, C, D
         options = optsMatch[1]
           .split(/\n|(?=[A-D]\s)/)
           .map(opt => opt.replace(/^[A-D][).]\s*/, '').trim())
@@ -44,6 +41,7 @@ function App() {
   const [success, setSuccess] = useState('');
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [exportType, setExportType] = useState('excel');
 
   const handleUpload = async (event) => {
     const file = event.target.files[0];
@@ -109,6 +107,59 @@ function App() {
     setLoading(false);
   };
 
+  // Export to Excel
+  const handleExportExcel = () => {
+    if (!questions.length) return;
+    const data = questions.map((q, idx) => ({
+      "No.": idx + 1,
+      "Question": q.question,
+      "Option A": q.options[0] || "",
+      "Option B": q.options[1] || "",
+      "Option C": q.options[2] || "",
+      "Option D": q.options[3] || "",
+      "Answer": q.answer
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Quiz");
+    XLSX.writeFile(workbook, "quiz.xlsx");
+  };
+
+  // Export to PDF
+  const handleExportPDF = () => {
+    if (!questions.length) return;
+    const doc = new jsPDF();
+    let y = 15;
+    doc.setFontSize(14);
+    doc.text("Quiz", 105, y, { align: "center" });
+    y += 10;
+    doc.setFontSize(11);
+
+    questions.forEach((q, idx) => {
+      if (y > 270) { doc.addPage(); y = 15; }
+      doc.text(`${idx + 1}. ${q.question}`, 10, y);
+      y += 7;
+      q.options.forEach((opt, i) => {
+        if (y > 270) { doc.addPage(); y = 15; }
+        const isCorrect = q.answer === String.fromCharCode(65 + i);
+        doc.text(
+          `${String.fromCharCode(65 + i)}. ${opt}${isCorrect ? '  ✔' : ''}`,
+          15,
+          y
+        );
+        y += 6;
+      });
+      y += 3;
+    });
+    doc.save('quiz.pdf');
+  };
+
+  // Handle export selection and action
+  const handleExport = () => {
+    if (exportType === 'excel') handleExportExcel();
+    else handleExportPDF();
+  };
+
   return (
     <div className="app-grid">
       <div className="left-panel">
@@ -154,7 +205,19 @@ function App() {
                 </div>
               </div>
             ))}
-            <button className="export-button" onClick={()=>alert("Export coming soon!")}>Export Quiz</button>
+            <div className="export-row">
+              <select
+                className="export-select"
+                value={exportType}
+                onChange={e => setExportType(e.target.value)}
+              >
+                <option value="excel">Export to Excel</option>
+                <option value="pdf">Export to PDF</option>
+              </select>
+              <button className="export-button" onClick={handleExport} disabled={!questions.length}>
+                Export Quiz
+              </button>
+            </div>
           </div>
         )}
       </div>
