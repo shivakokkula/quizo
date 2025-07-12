@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import './App.css';
 import * as pdfjsLib from 'pdfjs-dist';
 
+// Utility: Parse the LLM quiz output into structured questions
 function parseQuizOutput(quizText) {
   // Split by paragraphs (e.g., "**Paragraph 1:**")
-  const paragraphBlocks = quizText.split(/\*\*Paragraph \d+\:\*\*/).filter(Boolean);
+  const paragraphBlocks = quizText.split(/\*\*Paragraph \d+:\*\*/).filter(Boolean);
 
   const questions = [];
   paragraphBlocks.forEach(block => {
@@ -12,16 +13,17 @@ function parseQuizOutput(quizText) {
     const questionBlocks = block.split(/(?=Question: )/).filter(q => q.trim().startsWith("Question:"));
     questionBlocks.forEach(qb => {
       const qMatch = qb.match(/Question:\s*(.+?)\s*Options:/s);
-      const optsMatch = qb.match(/Options:\s*([A-D][\)\.] .+?)(?=Answer:)/s);
+      // Options: Match "A ...", "B ...", etc. until "Answer:"
+      const optsMatch = qb.match(/Options:\s*([\s\S]*?)\s*Answer:/);
       const ansMatch = qb.match(/Answer:\s*([A-D])/);
 
       let options = [];
       if (optsMatch && optsMatch[1]) {
-        // Split options by A) or A.
+        // Split options by lines starting with A, B, C, D
         options = optsMatch[1]
-          .split(/(?:[A-D][\)\.])\s?/)
-          .filter(Boolean)
-          .map(opt => opt.trim());
+          .split(/\n|(?=[A-D]\s)/)
+          .map(opt => opt.replace(/^[A-D][).]\s*/, '').trim())
+          .filter(opt => opt.length > 0);
       }
 
       if (qMatch && options.length === 4 && ansMatch) {
@@ -38,7 +40,6 @@ function parseQuizOutput(quizText) {
 
 function App() {
   const [quizText, setQuizText] = useState('');
-  const [questionTypes, setQuestionTypes] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [questions, setQuestions] = useState([]);
@@ -108,11 +109,6 @@ function App() {
     setLoading(false);
   };
 
-  const handleQuestionTypeChange = (e) => {
-    const options = Array.from(e.target.selectedOptions, option => option.value);
-    setQuestionTypes(options);
-  };
-
   return (
     <div className="app-grid">
       <div className="left-panel">
@@ -126,15 +122,6 @@ function App() {
           value={quizText}
           onChange={(e) => setQuizText(e.target.value)}
         />
-
-        <h3>Question Types</h3>
-        <select multiple className="select-type" onChange={handleQuestionTypeChange}>
-          <option value="mcq">MCQ</option>
-          <option value="true_false">True/False</option>
-          <option value="fill_blank">Fill in the Blanks</option>
-          <option value="higher_order">Higher Order</option>
-          <option value="match">Match the Following</option>
-        </select>
 
         <button className="submit-button" onClick={handleQuizGenerate} disabled={loading || !quizText}>
           {loading ? 'Generating...' : 'Generate Quiz'}
@@ -167,7 +154,7 @@ function App() {
                 </div>
               </div>
             ))}
-            <button className="export-button">Export Quiz</button>
+            <button className="export-button" onClick={()=>alert("Export coming soon!")}>Export Quiz</button>
           </div>
         )}
       </div>
