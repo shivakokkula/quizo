@@ -90,7 +90,7 @@ function App() {
     setSuccess('');
     setQuestions([]);
     try {
-      const res = await fetch('http://localhost:8000/generate-quiz', {
+      const res = await fetch('https://quizo-backend-aek5.onrender.com/generate-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: quizText })
