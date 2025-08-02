@@ -11,6 +11,7 @@ import Register from "./components/Register";
 import { Routes, Route, useNavigate, Navigate, Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { FiSun, FiMoon, FiMenu, FiX, FiLogOut, FiHome, FiGrid, FiClock, FiSettings, FiChevronRight, FiChevronLeft, FiLogIn } from 'react-icons/fi';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.js`;
 
@@ -67,13 +68,9 @@ const EXPORT_CONTENT_OPTIONS = [
 ];
 
 const QUESTION_TYPE_OPTIONS = [
-    { value: "mcq", label: "MCQ" },
-    { value: "mcq_multiple", label: "MCQ (Multiple Correct Answers)" },
-    { value: "truefalse", label: "True/False" },
-    { value: "fillblanks", label: "Fill in the blanks" },
-    { value: "faq", label: "FAQ" },
-    { value: "short", label: "Short Answer" },
-    { value: "higherorder", label: "Higher Order QA" },
+    { value: 'mcq', label: 'Multiple Choice' },
+    { value: 'truefalse', label: 'True/False' },
+    { value: 'short', label: 'Short Answer' }
 ];
 
 const SERVER_URL = constants.SERVER_URL;
@@ -95,9 +92,24 @@ function App() {
     const [difficulty, setDifficulty] = useState("medium");
     const [numOptions, setNumOptions] = useState(4);
     const [questionType, setQuestionType] = useState("mcq");
-    const [theme, setTheme] = useState("light");
+    const [theme, setTheme] = useState(() => {
+        // Get theme from localStorage or use system preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) return savedTheme;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    });
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(!!Cookies.get('jwtToken'));
+    const [activeMenuTile, setActiveMenuTile] = useState('dashboard'); // 'dashboard', 'history', 'settings'
+    const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
     const navigate = useNavigate();
+
+    // Update theme class on html element and save to localStorage
+    useEffect(() => {
+        const root = document.documentElement;
+        root.className = theme;
+        localStorage.setItem('theme', theme);
+    }, [theme]);
 
     // Update auth state when token changes
     useEffect(() => {
@@ -105,12 +117,19 @@ function App() {
         setIsAuthenticated(!!token);
     }, [navigate]);
 
-    useEffect(() => {
-        document.body.className = theme;
-    }, [theme]);
-
     const toggleTheme = () => {
         setTheme(prevTheme => (prevTheme === "light" ? "dark" : "light"));
+    };
+
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
+    const handleLogout = () => {
+        Cookies.remove('jwtToken');
+        setIsAuthenticated(false);
+        navigate('/login');
+        setIsMenuOpen(false);
     };
 
     const getFilteredQuestions = () => {
@@ -367,262 +386,362 @@ function App() {
             .finally(() => setTimeout(() => setSuccess(""), 2000));
     };
 
-    const handleLogout = () => {
-        Cookies.remove('jwtToken');
-        setIsAuthenticated(false);
-        navigate('/login');
+    const toggleMenuCollapse = () => {
+        setIsMenuCollapsed(!isMenuCollapsed);
     };
 
     return (
-        <div className={`app-grid ${theme}`}>
-            <nav>
-                <ul>
-                    <li><Link to="/">Home</Link></li>
+        <div className={`app-container ${theme}`}>
+            {/* Sidebar Navigation */}
+            <aside className={`sidebar ${isMenuCollapsed ? 'collapsed' : ''}`}>
+                <div className="sidebar-header">
+                    {!isMenuCollapsed && <h3>QuizOQ</h3>}
+                    <button 
+                        className="menu-toggle" 
+                        onClick={toggleMenuCollapse}
+                        aria-label={isMenuCollapsed ? 'Expand menu' : 'Collapse menu'}
+                    >
+                        {isMenuCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+                    </button>
+                </div>
+                
+                <nav className="menu-tiles">
+                    <button 
+                        className={`menu-tile ${activeMenuTile === 'dashboard' ? 'active' : ''}`}
+                        onClick={() => setActiveMenuTile('dashboard')}
+                        title="Dashboard"
+                    >
+                        <FiGrid className="tile-icon" />
+                        {!isMenuCollapsed && <span>Dashboard</span>}
+                    </button>
+                    
+                    <button 
+                        className={`menu-tile ${activeMenuTile === 'history' ? 'active' : ''}`}
+                        onClick={() => setActiveMenuTile('history')}
+                        title="History"
+                    >
+                        <FiClock className="tile-icon" />
+                        {!isMenuCollapsed && <span>History</span>}
+                    </button>
+                    
+                    <button 
+                        className={`menu-tile ${activeMenuTile === 'settings' ? 'active' : ''}`}
+                        onClick={() => setActiveMenuTile('settings')}
+                        title="Settings"
+                    >
+                        <FiSettings className="tile-icon" />
+                        {!isMenuCollapsed && <span>Settings</span>}
+                    </button>
+                </nav>
+
+                <div className="sidebar-footer">
                     {isAuthenticated ? (
-                        <li><button onClick={handleLogout}>Logout</button></li>
+                        <button 
+                            className="menu-tile logout-button"
+                            onClick={handleLogout}
+                            title="Logout"
+                        >
+                            <FiLogOut className="tile-icon" />
+                            {!isMenuCollapsed && <span>Logout</span>}
+                        </button>
                     ) : (
-                        <li><Link to="/login">Login</Link></li>
+                        <Link 
+                            to="/login" 
+                            className="menu-tile"
+                            title="Login"
+                        >
+                            <FiLogIn className="tile-icon" />
+                            {!isMenuCollapsed && <span>Login</span>}
+                        </Link>
                     )}
-                </ul>
-            </nav>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                    path="/"
-                    element={
-                        <PrivateRoute>
-                            <div className="main-content">
-                                <div className="left-panel">
-                                <div className="quiz-header">
-                                    <h2>Create Quiz</h2>
-                                    <button
-                                        className={`theme-toggle-button ${theme}`}
-                                        onClick={toggleTheme}
-                                    >
-                                        {theme === "light" ? "🌞" : "🌙"}
-                                    </button>
-                                </div>
+                </div>
+            </aside>
 
-                                <div className="form-row">
-                                    <label>Number of Questions:</label>
-                                    <select
-                                        value={numQuestions}
-                                        onChange={e => setNumQuestions(Number(e.target.value))}
-                                        className="dropdown-select"
-                                    >
-                                        {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
-                                            <option key={num} value={num}>{num}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="form-row">
-                                    <label>Difficulty:</label>
-                                    <select
-                                        value={difficulty}
-                                        onChange={e => setDifficulty(e.target.value)}
-                                        className="dropdown-select"
-                                    >
-                                        <option value="easy">Easy</option>
-                                        <option value="medium">Medium</option>
-                                        <option value="hard">Hard</option>
-                                    </select>
-                                </div>
-
-                                <input
-                                    type="file"
-                                    accept=".pdf,.txt,.json,image/*"
-                                    onChange={handleUpload}
-                                    className="upload-input"
-                                />
-                                <div className="or-text">OR</div>
-                                <textarea
-                                    value={quizText}
-                                    onChange={(e) => setQuizText(e.target.value)}
-                                    placeholder="Paste your text here..."
-                                    className="text-input"
-                                ></textarea>
-
-                                <div className="form-row">
-                                    <label>Question Type:</label>
-                                    <select
-                                        value={questionType}
-                                        onChange={(e) => setQuestionType(e.target.value)}
-                                    >
-                                        {QUESTION_TYPE_OPTIONS.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>
-                                                {opt.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="form-row">
-                                    <label>Number of Options:</label>
-                                    <input
-                                        type="number"
-                                        min="2"
-                                        max="6"
-                                        value={numOptions}
-                                        onChange={(e) => setNumOptions(parseInt(e.target.value, 10))}
-                                        disabled={questionType !== 'mcq'}
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={handleQuizGenerate}
-                                    disabled={loading || !quizText}
-                                    className="generate-button"
-                                >
-                                    {loading ? 'Generating...' : 'Generate Quiz'}
-                                </button>
-
-                                {error && <div className="error">{error}</div>}
-                                {success && <div className="success">{success}</div>}
-                            </div>
-                            <div className="right-panel">
-                                {loading && (
-                                    <div className="loading-overlay">
-                                        <div className="spinner"></div>
-                                    </div>
-                                )}
-
-                                <div className="quiz-header">
-                                    <h2>Generated Quiz</h2>
-                                    {questions.length > 0 && (
-                                        <div className="export-row">
-                                            <select
-                                                value={exportFormat}
-                                                onChange={(e) => setExportFormat(e.target.value)}
-                                                className="export-select"
-                                            >
-                                                <option value="excel">Excel</option>
-                                                <option value="pdf">PDF</option>
-                                                <option value="json">JSON</option>
-                                                <option value="txt">TXT</option>
-                                            </select>
-                                            <button
-                                                onClick={handleExport}
-                                                disabled={!questions.length}
-                                                className="export-button"
-                                            >
-                                                Export
-                                            </button>
-                                            <button
-                                                onClick={handleCopyJSON}
-                                                disabled={!questions.length}
-                                                className="export-button"
-                                            >
-                                                Copy JSON
-                                            </button>
-                                            <button
-                                                onClick={handleCopyTXT}
-                                                disabled={!questions.length}
-                                                className="export-button"
-                                            >
-                                                Copy TXT
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {!questions.length && !loading && (
-                                    <div className="no-quiz">No quiz generated yet.</div>
-                                )}
-
-                                {questions.length > 0 && (
-                                    <div className="quiz-list">
-                                        <div className="toggle-row">
-                                            <label className="toggle-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={exportContent === 'both' || exportContent === 'answers'}
-                                                    onChange={() => setExportContent(prev => prev === 'questions' ? 'both' : 'questions')}
-                                                />
-                                                Show Answers
-                                            </label>
-                                        </div>
-                                        {getFilteredQuestions().map((q, index) => (
-                                            <div key={index} className="quiz-card">
-                                                <div className="quiz-content">
-                                                    {q.isEditing ? (
-                                                        <div>
-                                                            <textarea
-                                                                className="edit-input"
-                                                                value={q.question}
-                                                                onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
-                                                            />
-                                                            {q.options && (
-                                                                <ul className="quiz-options">
-                                                                    {q.options.map((opt, i) => (
-                                                                        <li key={i}>
-                                                                            <input
-                                                                                type="text"
-                                                                                className="edit-input option-input"
-                                                                                value={opt}
-                                                                                onChange={(e) => handleQuestionChange(index, `option-${i}`, e.target.value)}
-                                                                            />
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            )}
-                                                            {q.answer && (
-                                                                <div className="quiz-answer">
-                                                                    <strong>Answer:</strong>
-                                                                    <input
-                                                                        type="text"
-                                                                        className="edit-input answer-input"
-                                                                        value={q.answer}
-                                                                        onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ) : (
-                                                        <div>
-                                                            <div className="quiz-question">{q.question}</div>
-                                                            {q.options && (
-                                                                <ul className="quiz-options">
-                                                                    {q.options.map((opt, i) => (
-                                                                        <li key={i}>
-                                                                            <span className="option-label">
-                                                                                {String.fromCharCode(65 + i)}.
-                                                                            </span>{' '}
-                                                                            {opt}
-                                                                        </li>
-                                                                    ))}
-                                                                </ul>
-                                                            )}
-                                                            {q.answer && (exportContent === "both" || exportContent === "answers") && (
-                                                                <div className="quiz-answer">
-                                                                    <strong>Answer:</strong> {q.answer}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="button-group">
-                                                    <button className="edit-button" onClick={() => handleEditQuestion(index)}>
-                                                        {q.isEditing ? "View" : "Edit"}
-                                                    </button>
-                                                    {q.isEditing && (
-                                                        <button className="save-button" onClick={handleSaveEdits}>
-                                                            Save
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+            {/* Main Content */}
+            <div className="main-content">
+                {/* Header */}
+                <header className="app-header">
+                    <button 
+                        className="menu-toggle" 
+                        onClick={toggleMenuCollapse}
+                        aria-label={isMenuCollapsed ? 'Expand menu' : 'Collapse menu'}
+                    >
+                        <FiMenu />
+                    </button>
+                    <h1 className="app-title">QuizOQ</h1>
+                    <div className="header-actions">
+                        <button 
+                            className="theme-toggle" 
+                            onClick={toggleTheme}
+                            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                        >
+                            {theme === 'light' ? <FiMoon /> : <FiSun />}
+                        </button>
                     </div>
-                </PrivateRoute>
-            } />
-        </Routes>
-    </div>
-);
+                </header>
+
+                {/* Page Content */}
+                <main className="page-content">
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route
+                            path="/"
+                            element={
+                                <PrivateRoute>
+                                    <div className="dashboard-container">
+                                        {/* Side by side layout */}
+                                        <div className="content-wrapper">
+                                            {/* Input Section */}
+                                            <section className="input-section">
+                                                <div className="section-header">
+                                                    <h2>Input</h2>
+                                                </div>
+                                                <div className="section-content">
+                                                    <div className="form-group">
+                                                        <input
+                                                            type="file"
+                                                            accept=".pdf,.txt,.json,image/*"
+                                                            onChange={handleUpload}
+                                                            className="form-control"
+                                                        />
+                                                    </div>
+
+                                                    <div className="text-center my-4">
+                                                        <span className="text-muted">OR</span>
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <textarea
+                                                            value={quizText}
+                                                            onChange={e => setQuizText(e.target.value)}
+                                                            placeholder="Enter your text here..."
+                                                            className="form-control textarea-large"
+                                                            rows={12}
+                                                        />
+                                                    </div>
+
+                                                    <div className="form-row">
+                                                        <div className="form-group">
+                                                            <label>Questions:</label>
+                                                            <select
+                                                                className="form-control"
+                                                                value={numQuestions}
+                                                                onChange={e => setNumQuestions(Number(e.target.value))}
+                                                            >
+                                                                {Array.from({ length: 20 }, (_, i) => i + 1).map(num => (
+                                                                    <option key={num} value={num}>{num}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+
+                                                        <div className="form-group">
+                                                            <label>Difficulty:</label>
+                                                            <select
+                                                                className="form-control"
+                                                                value={difficulty}
+                                                                onChange={e => setDifficulty(e.target.value)}
+                                                            >
+                                                                <option value="easy">Easy</option>
+                                                                <option value="medium">Medium</option>
+                                                                <option value="hard">Hard</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="form-row">
+                                                        <div className="form-group">
+                                                            <label>Type:</label>
+                                                            <select
+                                                                className="form-control"
+                                                                value={questionType}
+                                                                onChange={e => setQuestionType(e.target.value)}
+                                                            >
+                                                                {QUESTION_TYPE_OPTIONS.map((opt) => (
+                                                                    <option key={opt.value} value={opt.value}>
+                                                                        {opt.label}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+
+                                                        {questionType === 'mcq' && (
+                                                            <div className="form-group">
+                                                                <label>Options:</label>
+                                                                <input
+                                                                    type="number"
+                                                                    min="2"
+                                                                    max="6"
+                                                                    value={numOptions}
+                                                                    onChange={e => setNumOptions(parseInt(e.target.value, 10))}
+                                                                    className="form-control"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <button
+                                                        className="btn btn-primary w-full mt-2"
+                                                        onClick={handleQuizGenerate}
+                                                        disabled={loading || !quizText}
+                                                    >
+                                                        {loading ? 'Generating...' : 'Generate Quiz'}
+                                                    </button>
+
+                                                    {error && <div className="error-message">{error}</div>}
+                                                    {success && <div className="success-message">{success}</div>}
+                                                </div>
+                                            </section>
+
+                                            {/* Output Section */}
+                                            <section className="output-section">
+                                                <div className="section-header">
+                                                    <h2>Output</h2>
+                                                    {questions.length > 0 && (
+                                                        <div className="export-controls">
+                                                            <select
+                                                                className="form-control"
+                                                                value={exportFormat}
+                                                                onChange={e => setExportFormat(e.target.value)}
+                                                            >
+                                                                <option value="excel">Excel</option>
+                                                                <option value="pdf">PDF</option>
+                                                                <option value="json">JSON</option>
+                                                                <option value="txt">TXT</option>
+                                                            </select>
+                                                            <button
+                                                                className="btn btn-secondary"
+                                                                onClick={handleExport}
+                                                                disabled={!questions.length}
+                                                            >
+                                                                Export
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="section-content">
+                                                    {!questions.length && !loading && (
+                                                        <div className="empty-state">
+                                                            No quiz generated yet. Enter some text and click "Generate Quiz".
+                                                        </div>
+                                                    )}
+
+                                                    {loading && (
+                                                        <div className="loading-state">
+                                                            <div className="spinner"></div>
+                                                            <p>Generating your quiz...</p>
+                                                        </div>
+                                                    )}
+
+                                                    {questions.length > 0 && (
+                                                        <div className="quiz-questions">
+                                                            <div className="toggle-answers">
+                                                                <label className="toggle-label">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={exportContent === 'both' || exportContent === 'answers'}
+                                                                        onChange={() => setExportContent(prev => 
+                                                                            prev === 'questions' ? 'both' : 'questions'
+                                                                        )}
+                                                                    />
+                                                                    <span>Show Answers</span>
+                                                                </label>
+                                                            </div>
+
+                                                            <div className="questions-list">
+                                                                {getFilteredQuestions().map((q, index) => (
+                                                                    <div key={index} className="question-card">
+                                                                        <div className="question-content">
+                                                                            {q.isEditing ? (
+                                                                                <div className="edit-mode">
+                                                                                    <textarea
+                                                                                        className="form-control"
+                                                                                        value={q.question}
+                                                                                        onChange={(e) => handleQuestionChange(index, 'question', e.target.value)}
+                                                                                    />
+                                                                                    {q.options && (
+                                                                                        <div className="options-edit">
+                                                                                            {q.options.map((opt, i) => (
+                                                                                                <input
+                                                                                                    key={i}
+                                                                                                    type="text"
+                                                                                                    className="form-control option-input"
+                                                                                                    value={opt}
+                                                                                                    onChange={(e) => handleQuestionChange(index, `option-${i}`, e.target.value)}
+                                                                                                    placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                                                                                                />
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="form-control answer-input"
+                                                                                        value={q.answer || ''}
+                                                                                        onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
+                                                                                        placeholder="Correct answer"
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="view-mode">
+                                                                                    <div className="question-text">
+                                                                                        {index + 1}. {q.question}
+                                                                                    </div>
+                                                                                    {q.options && (
+                                                                                        <ul className="options-list">
+                                                                                            {q.options.map((opt, i) => (
+                                                                                                <li key={i} className="option-item">
+                                                                                                    <span className="option-label">
+                                                                                                        {String.fromCharCode(65 + i)}.
+                                                                                                    </span>
+                                                                                                    <span>{opt}</span>
+                                                                                                </li>
+                                                                                            ))}
+                                                                                        </ul>
+                                                                                    )}
+                                                                                    {(exportContent === "both" || exportContent === "answers") && q.answer && (
+                                                                                        <div className="answer-section">
+                                                                                            <strong>Answer: </strong>
+                                                                                            <span>{q.answer}</span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        
+                                                                        <div className="question-actions">
+                                                                            <button 
+                                                                                className={`btn btn-sm ${q.isEditing ? 'btn-cancel' : 'btn-edit'}`}
+                                                                                onClick={() => handleEditQuestion(index)}
+                                                                            >
+                                                                                {q.isEditing ? 'Cancel' : 'Edit'}
+                                                                            </button>
+                                                                            
+                                                                            {q.isEditing && (
+                                                                                <button 
+                                                                                    className="btn btn-sm btn-save"
+                                                                                    onClick={() => handleSaveEdits(index)}
+                                                                                >
+                                                                                    Save
+                                                                                </button>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </section>
+                                        </div>
+                                    </div>
+                                </PrivateRoute>
+                            }
+                        />
+                    </Routes>
+                </main>
+            </div>
+        </div>
+    );
 }
 
 export default App;
