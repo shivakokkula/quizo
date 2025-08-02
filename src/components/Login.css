@@ -1,0 +1,94 @@
+/* Login.css */
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 5% auto;
+  padding: 32px 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-container input[type="email"],
+.login-container input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d5dbe6;
+  border-radius: 6px;
+  font-size: 1em;
+  background: #f7fafd;
+  margin-bottom: 10px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+@media (max-width: 600px) {
+  .login-container {
+    padding: 18px 8px;
+    max-width: 98vw;
+    border-radius: 10px;
+  }
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #2d3a4b;
+}
+
+.login-container form > div {
+  margin-bottom: 18px;
+}
+
+.login-container label {
+  display: block;
+  margin-bottom: 6px;
+  color: #3a4a5b;
+  font-weight: 500;
+}
+
+.login-container button[type="submit"] {
+  width: 100%;
+  padding: 10px 0;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.login-container button[type="submit"]:hover {
+  background: #2563eb;
+}
+
+.login-container .google-login-btn {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.login-container p {
+  text-align: center;
+  margin-top: 18px;
+  color: #5a6b7b;
+}
+
+.login-container a {
+  color: #3b82f6;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.login-container .error {
+  color: #e53e3e;
+  text-align: center;
+  margin-bottom: 12px;
+}
