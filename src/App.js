@@ -98,7 +98,7 @@ function App() {
         if (savedTheme) return savedTheme;
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     });
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    // const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(!!Cookies.get('jwtToken'));
     const [activeMenuTile, setActiveMenuTile] = useState('dashboard'); // 'dashboard', 'history', 'settings'
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
@@ -125,7 +125,7 @@ function App() {
         Cookies.remove('jwtToken');
         setIsAuthenticated(false);
         navigate('/login');
-        setIsMenuOpen(false);
+        // setIsMenuOpen(false);
     };
 
     const getFilteredQuestions = () => {

@@ -29,7 +29,7 @@ const Register = () => {
     // Clear error when form data changes
     useEffect(() => {
         if (error) setError('');
-    }, [formData]);
+    }, [error, formData.name, formData.email, formData.password, formData.confirmPassword]);
 
     // Check password strength
     useEffect(() => {
