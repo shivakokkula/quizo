@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn, FiArrowRight } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
 import Cookies from "js-cookie";
 import constants from "../constants";
 import "./Login.css";
@@ -11,6 +11,7 @@ import "./Login.css";
 const SERVER_URL = constants.SERVER_URL;
 
 const Login = () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +22,7 @@ const Login = () => {
   // Clear error when email/password changes
   useEffect(() => {
     if (error) setError("");
-  }, [email, password]);
+  }, [email, password, error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

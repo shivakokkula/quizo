@@ -11,7 +11,7 @@ import Register from "./components/Register";
 import { Routes, Route, useNavigate, Navigate, Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { FiSun, FiMoon, FiMenu, FiX, FiLogOut, FiHome, FiGrid, FiClock, FiSettings, FiChevronRight, FiChevronLeft, FiLogIn } from 'react-icons/fi';
+import { FiSun, FiMoon, FiMenu, FiLogOut, FiGrid, FiClock, FiSettings, FiChevronRight, FiChevronLeft, FiLogIn } from 'react-icons/fi';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.js`;
 
@@ -61,11 +61,11 @@ function parseQuizOutput(quizText, numOptions = 4, questionType) {
     return questions;
 }
 
-const EXPORT_CONTENT_OPTIONS = [
-    { value: "both", label: "Questions & Answers" },
-    { value: "questions", label: "Questions Only" },
-    { value: "answers", label: "Answers Only" }
-];
+// const EXPORT_CONTENT_OPTIONS = [
+//     { value: "both", label: "Questions & Answers" },
+//     { value: "questions", label: "Questions Only" },
+//     { value: "answers", label: "Answers Only" }
+// ];
 
 const QUESTION_TYPE_OPTIONS = [
     { value: 'mcq', label: 'Multiple Choice' },
@@ -119,10 +119,6 @@ function App() {
 
     const toggleTheme = () => {
         setTheme(prevTheme => (prevTheme === "light" ? "dark" : "light"));
-    };
-
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
     };
 
     const handleLogout = () => {
@@ -359,32 +355,32 @@ function App() {
         downloadFile(URL.createObjectURL(blob), "quiz.txt");
     };
 
-    const handleCopyJSON = () => {
-        const filtered = getFilteredQuestions();
-        if (!filtered.length) return;
-        navigator.clipboard.writeText(JSON.stringify(filtered, null, 2))
-            .then(() => setSuccess("Quiz copied as JSON!"))
-            .catch(() => setError("Failed to copy."))
-            .finally(() => setTimeout(() => setSuccess(""), 2000));
-    };
+    // const handleCopyJSON = () => {
+    //     const filtered = getFilteredQuestions();
+    //     if (!filtered.length) return;
+    //     navigator.clipboard.writeText(JSON.stringify(filtered, null, 2))
+    //         .then(() => setSuccess("Quiz copied as JSON!"))
+    //         .catch(() => setError("Failed to copy."))
+    //         .finally(() => setTimeout(() => setSuccess(""), 2000));
+    // };
 
-    const handleCopyTXT = () => {
-        let txt = "";
-        getFilteredQuestions().forEach((q, idx) => {
-            txt += `${idx + 1}. ${q.question}\n`;
-            if (q.options) {
-                q.options.forEach((opt, i) => {
-                    txt += `  ${String.fromCharCode(65 + i)}. ${opt}\n`;
-                });
-            }
-            if (q.answer) txt += `  Answer: ${q.answer}\n`;
-            txt += "\n";
-        });
-        navigator.clipboard.writeText(txt)
-            .then(() => setSuccess("Quiz copied as TXT!"))
-            .catch(() => setError("Failed to copy."))
-            .finally(() => setTimeout(() => setSuccess(""), 2000));
-    };
+    // const handleCopyTXT = () => {
+    //     let txt = "";
+    //     getFilteredQuestions().forEach((q, idx) => {
+    //         txt += `${idx + 1}. ${q.question}\n`;
+    //         if (q.options) {
+    //             q.options.forEach((opt, i) => {
+    //                 txt += `  ${String.fromCharCode(65 + i)}. ${opt}\n`;
+    //             });
+    //         }
+    //         if (q.answer) txt += `  Answer: ${q.answer}\n`;
+    //         txt += "\n";
+    //     });
+    //     navigator.clipboard.writeText(txt)
+    //         .then(() => setSuccess("Quiz copied as TXT!"))
+    //         .catch(() => setError("Failed to copy."))
+    //         .finally(() => setTimeout(() => setSuccess(""), 2000));
+    // };
 
     const toggleMenuCollapse = () => {
         setIsMenuCollapsed(!isMenuCollapsed);
